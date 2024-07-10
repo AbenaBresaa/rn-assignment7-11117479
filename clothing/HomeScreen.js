@@ -4,7 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const Menu = require('./assets/Menu.png');
 const Logo = require('./assets/Logo.png');
 const Search = require('./assets/Search.png');
 const Bag = require('./assets/shoppingBag.png');
@@ -47,14 +46,20 @@ const HomeScreen = () => {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
+  const categories = {
+    Clothing: products.filter((product) => product.category === "men's clothing" || product.category === "women's clothing"),
+    Electronics: products.filter((product) => product.category === "electronics"),
+    Jewelry: products.filter((product) => product.category === "jewelery"),
+    Shoes: products.filter((product) => product.category === "shoes"),
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image style={styles.productImage} source={Menu} />
         <Image style={styles.productImage} source={Logo} />
         <View style={styles.iconContainer}>
           <Image style={styles.productIcon} source={Search} />
-          <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+          <TouchableOpacity onPress={() => navigation.navigate('CartScreen')}>
             <Image style={styles.productIcon} source={Bag} />
           </TouchableOpacity>
         </View>
@@ -67,24 +72,29 @@ const HomeScreen = () => {
         </View>
       </View>
 
-      <View style={styles.products}>
-        {products.map((product, index) => (
-          <View key={product.id} style={[styles.productBlock, (index % 2 !== 0) && { marginLeft: 10 }]}>
-            <ImageBackground style={styles.dresses} source={{ uri: product.image }}>
-              <TouchableOpacity onPress={() => addToCart(product)}>
-                <Image style={styles.tag} source={Add} />
-              </TouchableOpacity>
-            </ImageBackground>
-            <Text style={styles.first}>{product.title}</Text>
-            <Text style={styles.next}>{product.description}</Text>
-            <Text style={styles.last}>${product.price}</Text>
-            <Button
-              title="Details"
-              onPress={() => navigation.navigate('ProductDetails', { product })}
-            />
+      {Object.keys(categories).map((category) => (
+        <View key={category} style={styles.category}>
+          <Text style={styles.categoryTitle}>{category}</Text>
+          <View style={styles.products}>
+            {categories[category].map((product, index) => (
+              <View key={product.id} style={[styles.productBlock, (index % 2 !== 0) && { marginLeft: 10 }]}>
+                <ImageBackground style={styles.dresses} source={{ uri: product.image }}>
+                  <TouchableOpacity onPress={() => addToCart(product)}>
+                    <Image style={styles.tag} source={Add} />
+                  </TouchableOpacity>
+                </ImageBackground>
+                <Text style={styles.first}>{product.title}</Text>
+                <Text style={styles.next}>{product.description}</Text>
+                <Text style={styles.last}>${product.price}</Text>
+                <Button
+                  title="Details"
+                  onPress={() => navigation.navigate('ProductDetails', { product })}
+                />
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </View>
+      ))}
 
       <Button
         title="Go to Cart"
@@ -134,8 +144,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 20,
   },
-  products: {
+  category: {
+    marginTop: 20,
     paddingHorizontal: 16,
+  },
+  categoryTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  products: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'flex-start',
@@ -162,16 +179,16 @@ const styles = StyleSheet.create({
   first: {
     fontSize: 18,
     fontWeight: '500',
-    textAlign: 'left'
+    textAlign: 'left',
   },
   next: {
     fontSize: 15,
     opacity: 0.6,
-    textAlign: 'left'
+    textAlign: 'left',
   },
   last: {
     color: '#CC5801',
-    textAlign: 'left'
+    textAlign: 'left',
   },
   cartButton: {
     marginTop: 20,
